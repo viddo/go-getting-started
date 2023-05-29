@@ -1,0 +1,30 @@
+name: Okteto deploy preview
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: login
+        uses: okteto/context@latest
+        if: ${{ success() }}
+        with:
+          token: ${{ secrets.OKTETO_TOKEN }}
+          url: ${{ secrets.OKTETO_URL }}
+
+      - name: deploy preview environment
+        uses: okteto/deploy-preview@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ always() }}
+        with:
+          name: pr-${{ github.event.number }}
+          scope: global
+          timeout: 15m
